@@ -10,12 +10,15 @@ Apply these files in exact order inside **Supabase Dashboard → SQL Editor**:
    - Creates `SECURITY DEFINER` non-recursive membership helpers (`is_active_squad_member`, `shares_active_squad_with`), `auth.users` profile bootstrap trigger (`handle_new_user`), `ensure_my_profile()` / `update_my_profile(text)` RPCs, narrow column grants, and strict RLS policies.
 3. `supabase/migrations/0003_squads_and_invites.sql`
    - Creates Phase 3 squad & invite RPCs (`create_squad`, `create_invite`, `redeem_invite`, `get_my_squads`, `get_squad_members`, `list_squad_invites`, `revoke_invite`, `remove_member`, `leave_squad`, `transfer_ownership`, `delete_squad`).
+4. `supabase/migrations/0004_feed_and_realtime.sql`
+   - Creates `get_squad_feed(p_squad_id)` (Ghost Mode redaction, 8h campus freshness, shared expiry), `profiles` display-name signal trigger, and publishes only `public.squad_feed_signals` to `supabase_realtime`.
 
 ## 2. RLS & Invite SQL verification (disposable transaction)
 
 Run these scripts in **Supabase SQL Editor** (wrapped in `begin; ... rollback;` so synthetic test rows do not persist):
 - `supabase/tests/02_rls_two_user_test.sql` → `NOTICE: ALL PHASE 2 RLS & PROFILE TESTS PASSED`
 - `supabase/tests/03_squads_invites_test.sql` → `NOTICE: ALL PHASE 3 SQUAD & INVITE TESTS PASSED`
+- `supabase/tests/04_feed_realtime_test.sql` → `NOTICE: ALL PHASE 4 FEED & REALTIME TESTS PASSED`
 
 ## 3. Live two-account browser check
 

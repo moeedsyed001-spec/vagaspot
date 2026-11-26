@@ -57,3 +57,20 @@ export interface RedeemInviteResult {
   readonly squad_id: string | null;
   readonly squad_name: string | null;
 }
+
+export interface SquadFeedMember {
+  readonly user_id: string;
+  readonly display_name: string;
+  readonly avatar_url: string | null;
+  readonly role: SquadRole;
+  readonly is_ghost: boolean;
+  readonly campus_state: CampusState | null;
+  readonly campus_source: PresenceSource | null;
+  readonly campus_observed_at: string | null;
+  readonly availability: AvailabilityState | null;
+  readonly availability_expires_at: string | null;
+  readonly zone_id: string | null;
+  readonly zone_name: string | null;
+  readonly note: string | null;
+  readonly last_updated_at: string | null;
+}

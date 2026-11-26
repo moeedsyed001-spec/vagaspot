@@ -4,6 +4,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 import { AuthContext, type AuthContextValue } from '../features/auth/authContextValue';
+import { squadFeedQueryKey } from '../features/feed/useSquadFeed';
 import { squadsQueryKey } from '../features/squads/useSquads';
 import { ThemeProvider } from '../hooks/useTheme';
 import { AppRoutes } from './routes';
@@ -13,6 +14,7 @@ function renderAuthenticatedAt(path: string) {
     defaultOptions: { queries: { retry: false, staleTime: Infinity } },
   });
   queryClient.setQueryData(squadsQueryKey('user-1'), []);
+  queryClient.setQueryData(squadFeedQueryKey(undefined), []);
   queryClient.setQueryData(['profile', 'user-1'], null);
   const authValue: AuthContextValue = {
     session: null,

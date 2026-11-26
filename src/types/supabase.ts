@@ -1,5 +1,6 @@
 import type {
   RedeemInviteResult,
+  SquadFeedMember,
   SquadInviteSummary,
   SquadMember,
   SquadSummary,
@@ -73,6 +74,12 @@ export interface Database {
           p_squad_id: string;
         };
         Returns: SquadMember[];
+      };
+      get_squad_feed: {
+        Args: {
+          p_squad_id: string;
+        };
+        Returns: SquadFeedMember[];
       };
       list_squad_invites: {
         Args: {

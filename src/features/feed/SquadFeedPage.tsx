@@ -1,23 +1,19 @@
-import { Crown, EyeOff, RefreshCw, UserPlus } from 'lucide-react';
+import { EyeOff, Radio, RefreshCw, UserPlus, WifiOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { StatePanel } from '../../components/StatePanel';
 import { useAuth } from '../auth/authContextValue';
-import { useMySquads, useSquadMembers } from '../squads/useSquads';
-
-function getInitials(name: string): string {
-  const parts = name.trim().split(/\s+/);
-  const first = parts[0]?.[0] ?? 'F';
-  const second = parts[1]?.[0] ?? '';
-  return `${first}${second}`.toUpperCase();
-}
+import { useMySquads } from '../squads/useSquads';
+import { classifyFeedError, formatCampusLabel, formatRelativeTime } from './feedUtils';
+import { MemberFeedCard } from './MemberFeedCard';
+import { useSquadFeed } from './useSquadFeed';
 
 export function SquadFeedPage() {
   const { user } = useAuth();
   const squadsQuery = useMySquads(user?.id);
   const activeSquad = squadsQuery.data?.[0] ?? null;
-  const membersQuery = useSquadMembers(activeSquad?.squad_id);
+  const feedQuery = useSquadFeed(activeSquad?.squad_id, user?.id);
 
   if (squadsQuery.isLoading) {
     return (
@@ -30,11 +26,22 @@ export function SquadFeedPage() {
   }
 
   if (squadsQuery.error) {
+    const errorKind = classifyFeedError(squadsQuery.error, feedQuery.isOnline);
     return (
       <StatePanel
-        kind="error"
-        title="Unable to load squads"
-        description={squadsQuery.error.message}
+        kind={errorKind === 'offline' ? 'offline' : 'error'}
+        title={
+          errorKind === 'offline'
+            ? 'You appear to be offline'
+            : errorKind === 'paused'
+              ? 'Backend paused or unavailable'
+              : 'Unable to load squads'
+        }
+        description={
+          errorKind === 'paused'
+            ? 'The free backend may be paused after inactivity or temporarily unavailable. Ask the squad owner to check Supabase, or retry shortly.'
+            : squadsQuery.error.message
+        }
         action={
           <Button
             variant="secondary"
@@ -85,7 +92,24 @@ export function SquadFeedPage() {
     );
   }
 
-  const members = membersQuery.data ?? [];
+  const members = feedQuery.data ?? [];
+  const selfEntry = members.find((m) => m.user_id === user?.id) ?? null;
+  const hasAnyActivePresence = members.some(
+    (m) =>
+      !m.is_ghost &&
+      ((m.campus_state !== null && m.campus_state !== 'unknown') ||
+        m.availability !== null ||
+        m.zone_name !== null),
+  );
+
+  const lastSyncedIso =
+    feedQuery.dataUpdatedAt > 0 ? new Date(feedQuery.dataUpdatedAt).toISOString() : null;
+
+  const syncLabel = !feedQuery.isOnline
+    ? 'Offline — showing last confirmed state'
+    : feedQuery.realtimeStatus === 'live'
+      ? 'Live updates connected'
+      : 'Reconnecting — polling every 60s';
 
   return (
     <div className="space-y-4">
@@ -97,14 +121,51 @@ export function SquadFeedPage() {
               {activeSquad.role === 'owner' ? 'Owner' : 'Member'}
             </span>
           </div>
-          <p className="text-xs text-[var(--muted)] tabular-nums">
-            {activeSquad.member_count}{' '}
-            {activeSquad.member_count === 1 ? 'member' : 'members'} · Live presence feed wires in
-            Phase 4
-          </p>
+          <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-[var(--muted)] tabular-nums">
+            <span>
+              {activeSquad.member_count}{' '}
+              {activeSquad.member_count === 1 ? 'member' : 'members'}
+            </span>
+            <span>·</span>
+            <span className="inline-flex items-center gap-1">
+              {!feedQuery.isOnline ? (
+                <WifiOff className="h-3.5 w-3.5 text-[var(--warning)]" aria-hidden="true" />
+              ) : (
+                <Radio
+                  className={`h-3.5 w-3.5 ${
+                    feedQuery.realtimeStatus === 'live'
+                      ? 'text-[var(--success)]'
+                      : 'text-[var(--warning)]'
+                  }`}
+                  aria-hidden="true"
+                />
+              )}
+              <span>{syncLabel}</span>
+            </span>
+            {lastSyncedIso ? (
+              <>
+                <span>·</span>
+                <span>Synced {formatRelativeTime(lastSyncedIso)}</span>
+              </>
+            ) : null}
+          </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          <Button
+            variant="secondary"
+            disabled={feedQuery.isFetching || !feedQuery.isOnline}
+            onClick={() => {
+              void feedQuery.refetch();
+            }}
+            aria-label="Refresh squad feed"
+          >
+            <RefreshCw
+              className={`h-4 w-4 ${feedQuery.isFetching ? 'animate-spin' : ''}`}
+              aria-hidden="true"
+            />
+            <span>Refresh</span>
+          </Button>
           {activeSquad.role === 'owner' ? (
             <Link
               to="/settings/manage"
@@ -123,11 +184,30 @@ export function SquadFeedPage() {
         </div>
       </div>
 
+      {!feedQuery.isOnline ? (
+        <Card className="flex items-center justify-between gap-3 border-[var(--warning)]">
+          <div className="space-y-0.5">
+            <p className="text-sm font-semibold text-[var(--warning)]">Connection offline</p>
+            <p className="text-xs text-[var(--muted)]">
+              Presence unavailable offline. Updates cannot be marked live until reconnected.
+            </p>
+          </div>
+          <Link
+            to="/status"
+            className="shrink-0 text-xs font-semibold text-[var(--primary)] underline underline-offset-2"
+          >
+            Status details
+          </Link>
+        </Card>
+      ) : null}
+
       <Card className="flex flex-wrap items-center justify-between gap-3">
         <div className="space-y-0.5">
           <p className="text-sm font-semibold">Your presence summary</p>
           <p className="text-xs text-[var(--muted)]">
-            Campus: Unknown · Availability &amp; Realtime feed arrive in Phases 4–5
+            {selfEntry?.is_ghost
+              ? 'Ghost Mode is on — your presence is hidden from peers.'
+              : `Campus: ${formatCampusLabel(selfEntry?.campus_state ?? null)} · Check-in controls wire in Phase 5`}
           </p>
         </div>
         <Link
@@ -135,59 +215,73 @@ export function SquadFeedPage() {
           className="inline-flex min-h-11 items-center gap-1.5 rounded-[var(--radius-control)] border border-[var(--border)] px-3 py-2 text-xs font-semibold text-[var(--text)]"
         >
           <EyeOff className="h-4 w-4" aria-hidden="true" />
-          <span>Settings</span>
+          <span>Privacy</span>
         </Link>
       </Card>
 
-      {membersQuery.isLoading ? (
+      {feedQuery.isLoading ? (
         <StatePanel
           kind="loading"
-          title="Loading squad members"
-          description="Fetching active members."
+          title="Loading squad feed"
+          description="Fetching latest presence snapshots."
         />
-      ) : membersQuery.error ? (
+      ) : feedQuery.error ? (
+        (() => {
+          const kind = classifyFeedError(feedQuery.error, feedQuery.isOnline);
+          return (
+            <StatePanel
+              kind={kind === 'offline' ? 'offline' : 'error'}
+              title={
+                kind === 'offline'
+                  ? 'Connection lost'
+                  : kind === 'paused'
+                    ? 'Service paused or quota reached'
+                    : 'Could not load squad feed'
+              }
+              description={
+                kind === 'paused'
+                  ? 'The free Supabase backend may be paused after inactivity. Ask the squad owner to restore it, then retry.'
+                  : feedQuery.error.message
+              }
+              action={
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    void feedQuery.refetch();
+                  }}
+                >
+                  <RefreshCw className="h-4 w-4" aria-hidden="true" />
+                  <span>Retry</span>
+                </Button>
+              }
+            />
+          );
+        })()
+      ) : members.length === 0 ? (
         <StatePanel
-          kind="error"
-          title="Could not load squad members"
-          description={membersQuery.error.message}
+          kind="empty"
+          title="No members in feed"
+          description="Invite a friend from Owner Management to see them here."
         />
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2">
-          {members.map((member) => (
-            <Card key={member.user_id} className="flex items-center justify-between gap-3">
-              <div className="flex min-w-0 items-center gap-3">
-                {member.avatar_url ? (
-                  <img
-                    src={member.avatar_url}
-                    alt={member.display_name}
-                    referrerPolicy="no-referrer"
-                    className="h-10 w-10 shrink-0 rounded-full border border-[var(--border)] object-cover"
-                  />
-                ) : (
-                  <div
-                    aria-hidden="true"
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--surface-2)] text-xs font-bold text-[var(--primary)]"
-                  >
-                    {getInitials(member.display_name)}
-                  </div>
-                )}
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold">
-                    {member.display_name}
-                    {member.user_id === user?.id ? ' (You)' : ''}
-                  </p>
-                  <p className="text-xs text-[var(--muted)]">Status pending Phase 4</p>
-                </div>
-              </div>
-
-              {member.role === 'owner' ? (
-                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[var(--surface-2)] px-2.5 py-1 text-xs font-semibold text-[var(--primary)]">
-                  <Crown className="h-3.5 w-3.5" aria-hidden="true" />
-                  <span>Owner</span>
-                </span>
-              ) : null}
+        <div className="space-y-3">
+          {!hasAnyActivePresence ? (
+            <Card className="bg-[var(--surface-2)]">
+              <p className="text-xs text-[var(--muted)]">
+                No one has checked in yet. Manual check-in updates will appear here in Phase 5.
+              </p>
             </Card>
-          ))}
+          ) : null}
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            {members.map((member) => (
+              <MemberFeedCard
+                key={member.user_id}
+                member={member}
+                isSelf={member.user_id === user?.id}
+              />
+            ))}
+          </div>
         </div>
       )}
     </div>
