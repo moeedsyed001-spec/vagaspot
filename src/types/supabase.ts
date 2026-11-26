@@ -1,4 +1,6 @@
 import type {
+  CampusState,
+  CampusZone,
   RedeemInviteResult,
   SquadFeedMember,
   SquadInviteSummary,
@@ -31,6 +33,12 @@ export interface Database {
           display_name?: string;
           avatar_url?: string | null;
         };
+        Relationships: [];
+      };
+      campus_zones: {
+        Row: CampusZone;
+        Insert: Record<string, never>;
+        Update: Record<string, never>;
         Relationships: [];
       };
     };
@@ -80,6 +88,28 @@ export interface Database {
           p_squad_id: string;
         };
         Returns: SquadFeedMember[];
+      };
+      set_my_campus_state: {
+        Args: {
+          p_squad_id: string;
+          p_state: CampusState;
+        };
+        Returns: null;
+      };
+      set_my_availability: {
+        Args: {
+          p_squad_id: string;
+          p_availability: string | null;
+        };
+        Returns: string | null;
+      };
+      set_my_zone: {
+        Args: {
+          p_squad_id: string;
+          p_zone_id: string | null;
+          p_note?: string | null;
+        };
+        Returns: string | null;
       };
       list_squad_invites: {
         Args: {

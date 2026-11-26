@@ -207,7 +207,9 @@ export function SquadFeedPage() {
           <p className="text-xs text-[var(--muted)]">
             {selfEntry?.is_ghost
               ? 'Ghost Mode is on — your presence is hidden from peers.'
-              : `Campus: ${formatCampusLabel(selfEntry?.campus_state ?? null)} · Check-in controls wire in Phase 5`}
+              : `Campus: ${formatCampusLabel(selfEntry?.campus_state ?? null)}${
+                  selfEntry?.zone_name ? ` · ${selfEntry.zone_name}` : ''
+                }`}
           </p>
         </div>
         <Link
@@ -268,7 +270,7 @@ export function SquadFeedPage() {
           {!hasAnyActivePresence ? (
             <Card className="bg-[var(--surface-2)]">
               <p className="text-xs text-[var(--muted)]">
-                No one has checked in yet. Manual check-in updates will appear here in Phase 5.
+                No one has checked in yet. Tap Check-in to share your campus spot.
               </p>
             </Card>
           ) : null}

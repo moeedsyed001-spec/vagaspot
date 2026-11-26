@@ -12,6 +12,8 @@ Apply these files in exact order inside **Supabase Dashboard → SQL Editor**:
    - Creates Phase 3 squad & invite RPCs (`create_squad`, `create_invite`, `redeem_invite`, `get_my_squads`, `get_squad_members`, `list_squad_invites`, `revoke_invite`, `remove_member`, `leave_squad`, `transfer_ownership`, `delete_squad`).
 4. `supabase/migrations/0004_feed_and_realtime.sql`
    - Creates `get_squad_feed(p_squad_id)` (Ghost Mode redaction, 8h campus freshness, shared expiry), `profiles` display-name signal trigger, and publishes only `public.squad_feed_signals` to `supabase_realtime`.
+5. `supabase/migrations/0005_manual_checkin_and_zones.sql`
+   - Seeds `campus_config` (`comsats-islamabad`) and the 34 `campus_zones` (29 active student/secondary zones, 5 restricted utility rooms inactive), adds `compute_pkt_window_expiry` (`Asia/Karachi`), and adds `set_my_campus_state`, `set_my_availability`, and `set_my_zone`.
 
 ## 2. RLS & Invite SQL verification (disposable transaction)
 
@@ -19,6 +21,7 @@ Run these scripts in **Supabase SQL Editor** (wrapped in `begin; ... rollback;` 
 - `supabase/tests/02_rls_two_user_test.sql` → `NOTICE: ALL PHASE 2 RLS & PROFILE TESTS PASSED`
 - `supabase/tests/03_squads_invites_test.sql` → `NOTICE: ALL PHASE 3 SQUAD & INVITE TESTS PASSED`
 - `supabase/tests/04_feed_realtime_test.sql` → `NOTICE: ALL PHASE 4 FEED & REALTIME TESTS PASSED`
+- `supabase/tests/05_checkin_expiry_test.sql` → `NOTICE: ALL PHASE 5 CHECK-IN & EXPIRY TESTS PASSED`
 
 ## 3. Live two-account browser check
 

@@ -19,46 +19,46 @@ export type RedeemInviteStatus =
   | 'already_used'
   | 'rate_limited';
 
-export interface UserProfile {
+export type UserProfile = {
   readonly id: string;
   readonly display_name: string;
   readonly avatar_url: string | null;
   readonly created_at: string;
   readonly updated_at: string;
-}
+};
 
-export interface SquadSummary {
+export type SquadSummary = {
   readonly squad_id: string;
   readonly name: string;
   readonly role: SquadRole;
   readonly joined_at: string;
   readonly member_count: number;
-}
+};
 
-export interface SquadMember {
+export type SquadMember = {
   readonly user_id: string;
   readonly display_name: string;
   readonly avatar_url: string | null;
   readonly role: SquadRole;
   readonly joined_at: string;
-}
+};
 
-export interface SquadInviteSummary {
+export type SquadInviteSummary = {
   readonly id: string;
   readonly created_at: string;
   readonly expires_at: string;
   readonly consumed_at: string | null;
   readonly revoked_at: string | null;
   readonly status: InviteStatus;
-}
+};
 
-export interface RedeemInviteResult {
+export type RedeemInviteResult = {
   readonly status: RedeemInviteStatus;
   readonly squad_id: string | null;
   readonly squad_name: string | null;
-}
+};
 
-export interface SquadFeedMember {
+export type SquadFeedMember = {
   readonly user_id: string;
   readonly display_name: string;
   readonly avatar_url: string | null;
@@ -73,4 +73,13 @@ export interface SquadFeedMember {
   readonly zone_name: string | null;
   readonly note: string | null;
   readonly last_updated_at: string | null;
-}
+};
+
+export type CampusZone = {
+  readonly id: string;
+  readonly name: string;
+  readonly category: string;
+  readonly display_order: number;
+  readonly is_active: boolean;
+  readonly show_in_quick_list: boolean;
+};

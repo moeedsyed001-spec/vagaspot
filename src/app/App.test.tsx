@@ -5,6 +5,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 import { AuthContext, type AuthContextValue } from '../features/auth/authContextValue';
 import { squadFeedQueryKey } from '../features/feed/useSquadFeed';
+import { campusZonesQueryKey } from '../features/presence/usePresence';
 import { squadsQueryKey } from '../features/squads/useSquads';
 import { ThemeProvider } from '../hooks/useTheme';
 import { AppRoutes } from './routes';
@@ -15,6 +16,7 @@ function renderAuthenticatedAt(path: string) {
   });
   queryClient.setQueryData(squadsQueryKey('user-1'), []);
   queryClient.setQueryData(squadFeedQueryKey(undefined), []);
+  queryClient.setQueryData(campusZonesQueryKey, []);
   queryClient.setQueryData(['profile', 'user-1'], null);
   const authValue: AuthContextValue = {
     session: null,
@@ -55,7 +57,7 @@ describe('VAGASPOT app shell and routes', () => {
 
   it('renders Check-in, Settings, and Join routes when signed in', async () => {
     const checkIn = renderAuthenticatedAt('/check-in');
-    expect(checkIn.getByRole('heading', { name: 'Manual Check-in' })).toBeInTheDocument();
+    expect(checkIn.getByText('No active squad')).toBeInTheDocument();
     checkIn.unmount();
 
     const settings = renderAuthenticatedAt('/settings');
