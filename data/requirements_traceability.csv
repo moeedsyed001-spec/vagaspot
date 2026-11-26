@@ -1,0 +1,20 @@
+requirement_id,story_id,rule_or_spec,screen_or_module,test_reference,priority
+FR-001,US-001,OAuth setup,S-01 Auth,T-AUTH-*,P0
+FR-002,US-002,BR-08,S-02/S-03,T-SQ-01,P0
+FR-003,US-003;US-004,BR-09,S-03/S-04,T-INV-01..06,P0
+FR-004,US-005,BR-08;BR-17,S-05,T-RLS-01..04,P0
+FR-005,US-006,BR-01;BR-02;BR-06,S-06,T-BR-05;T-PRES-01,P0
+FR-006,US-007,BR-01..04;BR-13,S-06,T-BR-01..03,P0
+FR-007,US-008,BR-03;BR-11,S-07,T-BR-09;T-BR-10,P0
+FR-008,US-009;US-010,BR-05,S-05;S-08,T-BR-06;T-BR-07;T-RLS-08,P0
+FR-009,US-011;US-012,BR-08,S-08;S-09,T-SQ-02;T-SQ-03,P0
+FR-010,US-013,BR-04;BR-07;BR-16,S-05;S-10,T-BR-04;T-UX-*,P0
+FR-011,US-005,Architecture Realtime,S-05,T-RT-01,P0
+FR-012,US-014,BR-14;BR-15,S-08,T-PUSH-*,P1
+FR-013,US-015;US-016;US-017,Location Spec,S-08;Native plugin,T-GEO-*,P1
+FR-014,US-018,Platform/Deployment,App shell,T-PWA-*,P1
+NFR-001,,ADR-020;Zero-Cost Guide,Deployment,T-COST-01,P0
+NFR-002,,BR-05;BR-12;BR-17,All modules,T-PRIV-*,P0
+NFR-003,,BR-08;Database RLS,Backend,T-RLS-*,P0
+NFR-004,,Screens/Design System,All screens,T-UX-*,P0
+NFR-005,,AGENTS.md/Architecture,Repository,Code review,P0

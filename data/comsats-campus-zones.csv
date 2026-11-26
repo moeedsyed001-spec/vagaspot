@@ -1,0 +1,35 @@
+id,name,category,display_order,show_in_quick_list,source,notes
+gate-1,Gate 1,entry,1,true,map-sign,Main campus entry label from sign
+gate-2,Gate 2,entry,2,true,map-sign,Main campus entry label from sign
+parking,Parking,transport,3,true,map-sign,Parking label from sign
+mosque,Mosque,social,4,true,map-sign,Label from sign; confirm student access
+sitting-place,Sitting Place,social,5,true,map-sign,Label from sign
+academic-block-i,Academic Block I,academic,6,true,map-sign,Label from sign
+physics-block,Physics Block,academic,7,true,map-sign,Label from sign
+staff-canteen,Staff Canteen,food,8,false,map-sign,Confirm student access before making prominent
+academic-block-ii,Academic Block II,academic,9,true,map-sign,Label from sign
+faculty-block-i,Faculty Block I,academic,10,false,map-sign,Confirm student access
+faculty-block-ii,Faculty Block II,academic,11,false,map-sign,Confirm student access
+library,Library,learning,12,true,map-sign,Label from sign
+n-block,N-Block,academic,13,true,map-sign,Label from sign
+sitting-space,Sitting Space,social,14,true,map-sign,Separate sign label; confirm whether duplicate of Sitting Place
+student-services-centre,Student Services Centre,services,15,true,map-sign,Label from sign
+store,Store,services,16,false,map-sign,Potentially restricted; not quick list
+academic-block-iii,Academic Block III,academic,17,true,map-sign,Label from sign
+ssbc,SSBC,academic,18,true,map-sign,Confirm common student terminology
+r-and-d-lab,R & D Lab,lab,19,false,map-sign,May be restricted; not quick list
+tennis-court,Tennis Court,sports,20,true,map-sign,Label from sign
+badminton-court,Badminton Court,sports,21,true,map-sign,Label from sign
+basketball-court,Basketball Court,sports,22,true,map-sign,Label from sign
+cricket-ground,Cricket Ground,sports,23,true,map-sign,Use this exact label rather than “Main Ground”
+bus-parking,Bus Parking,transport,24,true,map-sign,Label from sign
+gate-3,Gate 3,entry,25,true,map-sign,Main campus entry label from sign
+generator-room,Generator Room,services,26,false,map-sign,Restricted service area; not quick list
+glass-room,Glass Room,services,27,false,map-sign,Confirm meaning/access; not quick list
+clean-room,Clean Room,lab,28,false,map-sign,Restricted/special facility; not quick list
+dispensary,Dispensary,health,29,true,map-sign,Label from sign
+office,Office,services,30,false,map-sign,Ambiguous office label; confirm
+dental-care-unit,Dental Care Unit,health,31,true,map-sign,Label from sign
+meteorological-office,Meteorological Office,services,32,false,map-sign,Confirm access; not quick list
+ht-panel-room,HT Panel Room,services,33,false,map-sign,Restricted utilities room; not quick list
+parking-shed,Parking Shed,transport,34,true,map-sign,Label from sign

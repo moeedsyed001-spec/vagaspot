@@ -1,0 +1,17 @@
+{
+  "name": "VAGASPOT",
+  "short_name": "VAGASPOT",
+  "description": "Your people. Your campus. Your spot.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F7F7FB",
+  "theme_color": "#6D45D8",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

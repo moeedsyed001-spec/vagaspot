@@ -1,0 +1,22 @@
+# Dependencies & build output
+node_modules/
+dist/
+coverage/
+
+# Environment & secrets — never commit real keys
+.env
+.env.local
+.env.*.local
+
+# Android local builds & signing secrets
+android/
+*.jks
+*.keystore
+keystore.properties
+google-services.json
+local.properties
+
+# Logs & OS files
+npm-debug.log*
+.DS_Store
+Thumbs.db
