@@ -1,5 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { AppShell } from '../components/AppShell';
+import { AuthCallbackPage } from '../features/auth/AuthCallbackPage';
+import { ProtectedRoute, PublicOnlyRoute } from '../features/auth/ProtectedRoute';
 import { SignInPage } from '../features/auth/SignInPage';
 import { ServiceStatusPage } from '../features/feed/ServiceStatusPage';
 import { SquadFeedPage } from '../features/feed/SquadFeedPage';
@@ -15,19 +17,26 @@ export function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/squad" replace />} />
-      <Route path="/auth" element={<SignInPage />} />
-      <Route path="/onboarding" element={<SquadOnboardingPage />} />
-      <Route path="/squads/create" element={<CreateSquadPage />} />
-      <Route path="/join" element={<JoinSquadPage />} />
-      <Route path="/join/:token" element={<JoinSquadPage />} />
 
-      <Route element={<AppShell />}>
-        <Route path="/squad" element={<SquadFeedPage />} />
-        <Route path="/check-in" element={<CheckInPage />} />
-        <Route path="/check-in/zones" element={<ZonePickerPage />} />
-        <Route path="/settings" element={<SettingsPage />} />
-        <Route path="/settings/manage" element={<OwnerManagementPage />} />
-        <Route path="/status" element={<ServiceStatusPage />} />
+      <Route element={<PublicOnlyRoute />}>
+        <Route path="/auth" element={<SignInPage />} />
+      </Route>
+      <Route path="/auth/callback" element={<AuthCallbackPage />} />
+      <Route path="/status" element={<ServiceStatusPage />} />
+
+      <Route element={<ProtectedRoute />}>
+        <Route path="/onboarding" element={<SquadOnboardingPage />} />
+        <Route path="/squads/create" element={<CreateSquadPage />} />
+        <Route path="/join" element={<JoinSquadPage />} />
+        <Route path="/join/:token" element={<JoinSquadPage />} />
+
+        <Route element={<AppShell />}>
+          <Route path="/squad" element={<SquadFeedPage />} />
+          <Route path="/check-in" element={<CheckInPage />} />
+          <Route path="/check-in/zones" element={<ZonePickerPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/settings/manage" element={<OwnerManagementPage />} />
+        </Route>
       </Route>
 
       <Route path="*" element={<Navigate to="/squad" replace />} />

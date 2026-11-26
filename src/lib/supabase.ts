@@ -1,18 +1,15 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '../types/supabase';
 import { envConfig } from './env';
 
-let cachedClient: SupabaseClient | null = null;
+let cachedClient: SupabaseClient<Database> | null = null;
 
-/**
- * Phase 1 placeholder client factory.
- * Returns null until Supabase is configured and wired in Phase 2.
- */
-export function getSupabaseClient(): SupabaseClient | null {
+export function getSupabaseClient(): SupabaseClient<Database> | null {
   if (!envConfig.isConfigured || !envConfig.supabaseUrl || !envConfig.supabaseAnonKey) {
     return null;
   }
   if (!cachedClient) {
-    cachedClient = createClient(envConfig.supabaseUrl, envConfig.supabaseAnonKey, {
+    cachedClient = createClient<Database>(envConfig.supabaseUrl, envConfig.supabaseAnonKey, {
       auth: {
         flowType: 'pkce',
         persistSession: true,

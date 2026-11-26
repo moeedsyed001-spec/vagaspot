@@ -1,5 +1,7 @@
 import { MapPinCheck, Settings, Users } from 'lucide-react';
 import { NavLink, Outlet } from 'react-router-dom';
+import { useAuth } from '../features/auth/authContextValue';
+import { useProfile } from '../features/auth/useProfile';
 import { BrandMark } from './BrandMark';
 
 const NAV_ITEMS = [
@@ -9,6 +11,10 @@ const NAV_ITEMS = [
 ] as const;
 
 export function AppShell() {
+  const { user } = useAuth();
+  const profileQuery = useProfile(user?.id);
+  const displayName = profileQuery.data?.display_name;
+
   return (
     <div className="flex min-h-dvh flex-col bg-[var(--bg)] text-[var(--text)]">
       <header className="sticky top-0 z-20 border-b border-[var(--border)] bg-[var(--surface)]">
@@ -23,24 +29,35 @@ export function AppShell() {
             </div>
           </NavLink>
 
-          <nav aria-label="Desktop navigation" className="hidden items-center gap-2 md:flex">
-            {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
+          <div className="flex items-center gap-3">
+            {displayName ? (
               <NavLink
-                key={to}
-                to={to}
-                className={({ isActive }) =>
-                  `inline-flex min-h-11 items-center gap-2 rounded-[var(--radius-control)] px-3.5 py-2 text-sm font-semibold transition-colors duration-150 ${
-                    isActive
-                      ? 'bg-[var(--surface-2)] text-[var(--primary)]'
-                      : 'text-[var(--muted)] hover:bg-[var(--surface-2)] hover:text-[var(--text)]'
-                  }`
-                }
+                to="/settings"
+                className="hidden max-w-[180px] truncate rounded-full border border-[var(--border)] bg-[var(--surface-2)] px-3 py-1 text-xs font-medium text-[var(--text)] sm:inline-block"
               >
-                <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                <span>{label}</span>
+                {displayName}
               </NavLink>
-            ))}
-          </nav>
+            ) : null}
+
+            <nav aria-label="Desktop navigation" className="hidden items-center gap-2 md:flex">
+              {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  className={({ isActive }) =>
+                    `inline-flex min-h-11 items-center gap-2 rounded-[var(--radius-control)] px-3.5 py-2 text-sm font-semibold transition-colors duration-150 ${
+                      isActive
+                        ? 'bg-[var(--surface-2)] text-[var(--primary)]'
+                        : 'text-[var(--muted)] hover:bg-[var(--surface-2)] hover:text-[var(--text)]'
+                    }`
+                  }
+                >
+                  <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  <span>{label}</span>
+                </NavLink>
+              ))}
+            </nav>
+          </div>
         </div>
       </header>
 
