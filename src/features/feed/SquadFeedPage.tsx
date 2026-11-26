@@ -1,9 +1,10 @@
-import { EyeOff, Radio, RefreshCw, UserPlus, WifiOff } from 'lucide-react';
+import { Radio, RefreshCw, UserPlus, WifiOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { StatePanel } from '../../components/StatePanel';
 import { useAuth } from '../auth/authContextValue';
+import { GhostModeControl } from '../presence/GhostModeControl';
 import { useMySquads } from '../squads/useSquads';
 import { classifyFeedError, formatCampusLabel, formatRelativeTime } from './feedUtils';
 import { MemberFeedCard } from './MemberFeedCard';
@@ -206,19 +207,18 @@ export function SquadFeedPage() {
           <p className="text-sm font-semibold">Your presence summary</p>
           <p className="text-xs text-[var(--muted)]">
             {selfEntry?.is_ghost
-              ? 'Ghost Mode is on — your presence is hidden from peers.'
+              ? 'Ghost Mode is on — peers only see your name and "Presence hidden".'
               : `Campus: ${formatCampusLabel(selfEntry?.campus_state ?? null)}${
                   selfEntry?.zone_name ? ` · ${selfEntry.zone_name}` : ''
                 }`}
           </p>
         </div>
-        <Link
-          to="/settings"
-          className="inline-flex min-h-11 items-center gap-1.5 rounded-[var(--radius-control)] border border-[var(--border)] px-3 py-2 text-xs font-semibold text-[var(--text)]"
-        >
-          <EyeOff className="h-4 w-4" aria-hidden="true" />
-          <span>Privacy</span>
-        </Link>
+        <GhostModeControl
+          squadId={activeSquad.squad_id}
+          userId={user?.id}
+          isGhost={selfEntry?.is_ghost ?? false}
+          compact
+        />
       </Card>
 
       {feedQuery.isLoading ? (

@@ -111,6 +111,13 @@ export interface Database {
         };
         Returns: string | null;
       };
+      set_ghost_mode: {
+        Args: {
+          p_squad_id: string;
+          p_enabled: boolean;
+        };
+        Returns: null;
+      };
       list_squad_invites: {
         Args: {
           p_squad_id: string;

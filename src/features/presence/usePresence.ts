@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getSupabaseClient } from '../../lib/supabase';
-import type { AvailabilityState, CampusState, CampusZone } from '../../types/domain';
+import type { AvailabilityState, CampusState, CampusZone, SquadFeedMember } from '../../types/domain';
 import { squadFeedQueryKey } from '../feed/useSquadFeed';
 import { validateNote } from './expiry';
 
@@ -116,6 +116,55 @@ export function useSetZone(squadId: string | undefined) {
       return data;
     },
     onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: squadFeedQueryKey(squadId) });
+    },
+  });
+}
+
+export function useSetGhostMode(squadId: string | undefined, userId: string | undefined) {
+  const queryClient = useQueryClient();
+
+  return useMutation<undefined, Error, boolean>({
+    mutationFn: async (enabled: boolean) => {
+      if (!squadId) {
+        throw new Error('Join or create a squad first.');
+      }
+      const supabase = getSupabaseClient();
+      if (!supabase) {
+        throw new Error('Supabase is not configured.');
+      }
+      const { error } = await supabase.rpc('set_ghost_mode', {
+        p_squad_id: squadId,
+        p_enabled: enabled,
+      });
+      if (error) {
+        throw new Error(error.message);
+      }
+      return undefined;
+    },
+    onSuccess: async (_data, enabled) => {
+      // Scrub any prior cached fields for this user in client memory immediately
+      if (squadId && userId) {
+        queryClient.setQueryData<SquadFeedMember[]>(squadFeedQueryKey(squadId), (prev) =>
+          prev?.map((member) =>
+            member.user_id === userId
+              ? {
+                  ...member,
+                  is_ghost: enabled,
+                  campus_state: enabled ? null : 'unknown',
+                  campus_source: null,
+                  campus_observed_at: null,
+                  availability: null,
+                  availability_expires_at: null,
+                  zone_id: null,
+                  zone_name: null,
+                  note: null,
+                  last_updated_at: null,
+                }
+              : member,
+          ),
+        );
+      }
       await queryClient.invalidateQueries({ queryKey: squadFeedQueryKey(squadId) });
     },
   });

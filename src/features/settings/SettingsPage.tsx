@@ -8,7 +8,9 @@ import { envConfig } from '../../lib/env';
 import type { ThemePreference } from '../../types/domain';
 import { useAuth } from '../auth/authContextValue';
 import { useProfile, useUpdateDisplayName, validateDisplayName } from '../auth/useProfile';
+import { useSquadFeed } from '../feed/useSquadFeed';
 import { NotificationPreferencesCard } from '../notifications/NotificationPreferencesCard';
+import { GhostModeControl } from '../presence/GhostModeControl';
 import { useLeaveSquad, useMySquads } from '../squads/useSquads';
 
 const THEME_OPTIONS: readonly { value: ThemePreference; label: string }[] = [
@@ -45,6 +47,8 @@ export function SettingsPage() {
 
   const profile = profileQuery.data;
   const activeSquad = squadsQuery.data?.[0] ?? null;
+  const feedQuery = useSquadFeed(activeSquad?.squad_id, user?.id);
+  const selfFeed = (feedQuery.data ?? []).find((m) => m.user_id === user?.id) ?? null;
   const inputName = draftName ?? profile?.display_name ?? '';
 
   const handleSaveName = async (event: SyntheticEvent<HTMLFormElement>) => {
@@ -215,15 +219,19 @@ export function SettingsPage() {
         </div>
       </Card>
 
-      <Card className="space-y-2">
+      <Card className="space-y-3">
         <h2 className="text-base font-semibold">Privacy &amp; Ghost Mode</h2>
-        <p className="text-sm text-[var(--muted)]">
-          Ghost Mode hides your campus presence, availability, zone, source, and timestamps from
-          everyone in the squad, including owners. Wired in Phase 6.
-        </p>
-        <Button variant="secondary" disabled>
-          Ghost Mode Toggle (Phase 6)
-        </Button>
+        {activeSquad ? (
+          <GhostModeControl
+            squadId={activeSquad.squad_id}
+            userId={user?.id}
+            isGhost={selfFeed?.is_ghost ?? false}
+          />
+        ) : (
+          <p className="text-sm text-[var(--muted)]">
+            Join or create a squad to manage per-squad Ghost Mode.
+          </p>
+        )}
       </Card>
 
       <Card className="space-y-2">
