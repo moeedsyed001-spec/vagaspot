@@ -8,12 +8,14 @@ Apply these files in exact order inside **Supabase Dashboard → SQL Editor**:
    - Enables `pgcrypto` in `extensions`, creates all core tables, triggers, hardened `presence` Ghost/expiry constraints, `squad_feed_signals`, `invite_redeem_attempts`, enables RLS on every table, and revokes default grants.
 2. `supabase/migrations/0002_rls_and_profile_auth.sql`
    - Creates `SECURITY DEFINER` non-recursive membership helpers (`is_active_squad_member`, `shares_active_squad_with`), `auth.users` profile bootstrap trigger (`handle_new_user`), `ensure_my_profile()` / `update_my_profile(text)` RPCs, narrow column grants, and strict RLS policies.
+3. `supabase/migrations/0003_squads_and_invites.sql`
+   - Creates Phase 3 squad & invite RPCs (`create_squad`, `create_invite`, `redeem_invite`, `get_my_squads`, `get_squad_members`, `list_squad_invites`, `revoke_invite`, `remove_member`, `leave_squad`, `transfer_ownership`, `delete_squad`).
 
-## 2. Two-user RLS SQL verification (disposable transaction)
+## 2. RLS & Invite SQL verification (disposable transaction)
 
-Run `supabase/tests/02_rls_two_user_test.sql` in **Supabase SQL Editor**:
-- It is wrapped in `begin; ... rollback;` so synthetic test rows are rolled back automatically.
-- Look for `NOTICE: ALL PHASE 2 RLS & PROFILE TESTS PASSED`.
+Run these scripts in **Supabase SQL Editor** (wrapped in `begin; ... rollback;` so synthetic test rows do not persist):
+- `supabase/tests/02_rls_two_user_test.sql` → `NOTICE: ALL PHASE 2 RLS & PROFILE TESTS PASSED`
+- `supabase/tests/03_squads_invites_test.sql` → `NOTICE: ALL PHASE 3 SQUAD & INVITE TESTS PASSED`
 
 ## 3. Live two-account browser check
 

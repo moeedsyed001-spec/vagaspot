@@ -120,6 +120,7 @@ language plpgsql
 security definer
 set search_path = ''
 as $$
+#variable_conflict use_column
 declare
   v_uid uuid := auth.uid();
   v_meta jsonb;
@@ -169,6 +170,7 @@ language plpgsql
 security definer
 set search_path = ''
 as $$
+#variable_conflict use_column
 declare
   v_uid uuid := auth.uid();
   v_trimmed text;

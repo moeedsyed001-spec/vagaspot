@@ -1,6 +1,6 @@
 import { LogOut } from 'lucide-react';
 import { useState, type SyntheticEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { useTheme } from '../../hooks/useTheme';
@@ -9,6 +9,7 @@ import type { ThemePreference } from '../../types/domain';
 import { useAuth } from '../auth/authContextValue';
 import { useProfile, useUpdateDisplayName, validateDisplayName } from '../auth/useProfile';
 import { NotificationPreferencesCard } from '../notifications/NotificationPreferencesCard';
+import { useLeaveSquad, useMySquads } from '../squads/useSquads';
 
 const THEME_OPTIONS: readonly { value: ThemePreference; label: string }[] = [
   { value: 'system', label: 'System' },
@@ -28,17 +29,22 @@ function getInitials(name: string | undefined): string {
 }
 
 export function SettingsPage() {
+  const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
   const { user, signOut } = useAuth();
   const profileQuery = useProfile(user?.id);
   const updateDisplayName = useUpdateDisplayName(user?.id);
+  const squadsQuery = useMySquads(user?.id);
+  const leaveSquad = useLeaveSquad(user?.id);
 
   const [draftName, setDraftName] = useState<string | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+  const [confirmLeave, setConfirmLeave] = useState(false);
 
   const profile = profileQuery.data;
+  const activeSquad = squadsQuery.data?.[0] ?? null;
   const inputName = draftName ?? profile?.display_name ?? '';
 
   const handleSaveName = async (event: SyntheticEvent<HTMLFormElement>) => {
@@ -57,7 +63,7 @@ export function SettingsPage() {
       setDraftName(null);
       setSaveSuccess(true);
     } catch {
-      // Mutation error is exposed via updateDisplayName.error
+      // Mutation error exposed via updateDisplayName.error
     }
   };
 
@@ -67,6 +73,19 @@ export function SettingsPage() {
       await signOut();
     } finally {
       setSigningOut(false);
+    }
+  };
+
+  const handleLeaveSquad = async () => {
+    if (!activeSquad) {
+      return;
+    }
+    try {
+      await leaveSquad.mutateAsync(activeSquad.squad_id);
+      setConfirmLeave(false);
+      void navigate('/onboarding', { replace: true });
+    } catch {
+      // Error exposed via leaveSquad.error
     }
   };
 
@@ -165,7 +184,9 @@ export function SettingsPage() {
           ) : null}
 
           <div className="flex items-center justify-between gap-2">
-            <span className="text-xs text-[var(--muted)]">1–50 characters. Visible to squadmates.</span>
+            <span className="text-xs text-[var(--muted)]">
+              1–50 characters. Visible to squadmates.
+            </span>
             <Button
               type="submit"
               disabled={profileQuery.isLoading || updateDisplayName.isPending}
@@ -195,7 +216,7 @@ export function SettingsPage() {
       </Card>
 
       <Card className="space-y-2">
-        <h2 className="text-base font-semibold">Privacy & Ghost Mode</h2>
+        <h2 className="text-base font-semibold">Privacy &amp; Ghost Mode</h2>
         <p className="text-sm text-[var(--muted)]">
           Ghost Mode hides your campus presence, availability, zone, source, and timestamps from
           everyone in the squad, including owners. Wired in Phase 6.
@@ -206,7 +227,7 @@ export function SettingsPage() {
       </Card>
 
       <Card className="space-y-2">
-        <h2 className="text-base font-semibold">Location & Campus Detection</h2>
+        <h2 className="text-base font-semibold">Location &amp; Campus Detection</h2>
         <p className="text-sm text-[var(--muted)]">
           Web supports manual check-in only. Automatic Android campus detection is reserved for
           Release 2 after campus boundary verification.
@@ -216,18 +237,80 @@ export function SettingsPage() {
       <NotificationPreferencesCard />
 
       <Card className="space-y-3">
-        <h2 className="text-base font-semibold">Squad & Account Controls</h2>
-        <div className="flex flex-wrap gap-2">
-          <Link
-            to="/settings/manage"
-            className="inline-flex min-h-11 items-center justify-center rounded-[var(--radius-control)] border border-[var(--border)] px-4 py-2 text-sm font-semibold text-[var(--text)]"
-          >
-            Owner Management
-          </Link>
-          <Button variant="danger" disabled>
-            Delete Account (Server Flow Later)
-          </Button>
-        </div>
+        <h2 className="text-base font-semibold">Squad &amp; Account Controls</h2>
+        {activeSquad ? (
+          <div className="space-y-3">
+            <p className="text-sm text-[var(--muted)]">
+              Active squad:{' '}
+              <span className="font-semibold text-[var(--text)]">{activeSquad.name}</span> (
+              {activeSquad.role})
+            </p>
+
+            {leaveSquad.error ? (
+              <p role="alert" className="text-xs text-[var(--danger)]">
+                {leaveSquad.error.message}
+              </p>
+            ) : null}
+
+            <div className="flex flex-wrap gap-2">
+              {activeSquad.role === 'owner' ? (
+                <Link
+                  to="/settings/manage"
+                  className="inline-flex min-h-11 items-center justify-center rounded-[var(--radius-control)] border border-[var(--border)] px-4 py-2 text-sm font-semibold text-[var(--text)]"
+                >
+                  Owner Management
+                </Link>
+              ) : null}
+
+              {!confirmLeave ? (
+                <Button
+                  variant="danger"
+                  onClick={() => {
+                    setConfirmLeave(true);
+                  }}
+                >
+                  Leave Squad
+                </Button>
+              ) : (
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    variant="danger"
+                    disabled={leaveSquad.isPending}
+                    onClick={() => {
+                      void handleLeaveSquad();
+                    }}
+                  >
+                    {leaveSquad.isPending ? 'Leaving…' : 'Confirm Leave'}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      setConfirmLeave(false);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              )}
+
+              <Button variant="danger" disabled>
+                Delete Account (Server Flow Later)
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            <Link
+              to="/onboarding"
+              className="inline-flex min-h-11 items-center justify-center rounded-[var(--radius-control)] bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-[var(--primary-fg)]"
+            >
+              Create or Join Squad
+            </Link>
+            <Button variant="danger" disabled>
+              Delete Account (Server Flow Later)
+            </Button>
+          </div>
+        )}
       </Card>
 
       <Card className="space-y-1.5">

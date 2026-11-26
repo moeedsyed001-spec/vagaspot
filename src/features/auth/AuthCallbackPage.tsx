@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { BrandMark } from '../../components/BrandMark';
 import { Card } from '../../components/Card';
 import { StatePanel } from '../../components/StatePanel';
+import { readPendingInviteToken } from '../squads/pendingInvite';
 import { useAuth } from './authContextValue';
 import { readOAuthErrorFromUrl } from './authRedirect';
 
@@ -16,7 +17,8 @@ export function AuthCallbackPage() {
 
   useEffect(() => {
     if (!isLoading && user && !displayError) {
-      void navigate('/squad', { replace: true });
+      const target = readPendingInviteToken() ? '/join' : '/squad';
+      void navigate(target, { replace: true });
     }
   }, [displayError, isLoading, navigate, user]);
 

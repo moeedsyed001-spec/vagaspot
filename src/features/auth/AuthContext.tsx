@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { envConfig } from '../../lib/env';
 import { getSupabaseClient } from '../../lib/supabase';
+import { clearPendingInviteToken } from '../squads/pendingInvite';
 import { AuthContext } from './authContextValue';
 import { getWebOAuthCallbackUrl } from './authRedirect';
 
@@ -46,6 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       setSession(nextSession ?? null);
       if (event === 'SIGNED_OUT') {
+        clearPendingInviteToken();
         queryClient.clear();
       }
       setIsLoading(false);
@@ -82,6 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = useCallback(async () => {
     setAuthError(null);
+    clearPendingInviteToken();
     const supabase = getSupabaseClient();
     if (!supabase) {
       setSession(null);

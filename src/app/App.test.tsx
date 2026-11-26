@@ -1,16 +1,19 @@
 import type { User } from '@supabase/supabase-js';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 import { AuthContext, type AuthContextValue } from '../features/auth/authContextValue';
+import { squadsQueryKey } from '../features/squads/useSquads';
 import { ThemeProvider } from '../hooks/useTheme';
 import { AppRoutes } from './routes';
 
 function renderAuthenticatedAt(path: string) {
   const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
+    defaultOptions: { queries: { retry: false, staleTime: Infinity } },
   });
+  queryClient.setQueryData(squadsQueryKey('user-1'), []);
+  queryClient.setQueryData(['profile', 'user-1'], null);
   const authValue: AuthContextValue = {
     session: null,
     user: { id: 'user-1', email: 'friend@example.com' } as User,
@@ -36,26 +39,30 @@ function renderAuthenticatedAt(path: string) {
 }
 
 describe('VAGASPOT app shell and routes', () => {
-  it('renders the three primary mobile tabs and Squad Feed placeholder for signed-in users', () => {
+  it('renders the three primary mobile tabs and Squad Feed for signed-in users', async () => {
     renderAuthenticatedAt('/squad');
 
-    expect(screen.getByRole('heading', { name: 'Squad Feed' })).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Squad Feed' })).toBeInTheDocument();
+    });
     const mobileNav = screen.getByRole('navigation', { name: 'Primary mobile navigation' });
     expect(mobileNav).toHaveTextContent('Squad');
     expect(mobileNav).toHaveTextContent('Check-in');
     expect(mobileNav).toHaveTextContent('Settings');
   });
 
-  it('renders placeholder screens for Check-in, Settings, and Join routes when signed in', () => {
-    const { unmount } = renderAuthenticatedAt('/check-in');
-    expect(screen.getByRole('heading', { name: 'Manual Check-in' })).toBeInTheDocument();
-    unmount();
+  it('renders Check-in, Settings, and Join routes when signed in', async () => {
+    const checkIn = renderAuthenticatedAt('/check-in');
+    expect(checkIn.getByRole('heading', { name: 'Manual Check-in' })).toBeInTheDocument();
+    checkIn.unmount();
 
     const settings = renderAuthenticatedAt('/settings');
     expect(settings.getByRole('heading', { name: 'Settings' })).toBeInTheDocument();
     settings.unmount();
 
     const join = renderAuthenticatedAt('/join/sample-token');
-    expect(join.getByRole('heading', { name: 'Join squad' })).toBeInTheDocument();
+    await waitFor(() => {
+      expect(join.getByRole('heading', { name: 'Join squad' })).toBeInTheDocument();
+    });
   });
 });

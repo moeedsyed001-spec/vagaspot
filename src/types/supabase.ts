@@ -1,4 +1,10 @@
-import type { UserProfile } from './domain';
+import type {
+  RedeemInviteResult,
+  SquadInviteSummary,
+  SquadMember,
+  SquadSummary,
+  UserProfile,
+} from './domain';
 
 export interface Database {
   public: {
@@ -38,6 +44,73 @@ export interface Database {
           p_display_name: string;
         };
         Returns: UserProfile[];
+      };
+      create_squad: {
+        Args: {
+          p_name: string;
+        };
+        Returns: string;
+      };
+      create_invite: {
+        Args: {
+          p_squad_id: string;
+          p_ttl_hours?: number;
+        };
+        Returns: string;
+      };
+      redeem_invite: {
+        Args: {
+          p_raw_token: string;
+        };
+        Returns: RedeemInviteResult[];
+      };
+      get_my_squads: {
+        Args: Record<string, never>;
+        Returns: SquadSummary[];
+      };
+      get_squad_members: {
+        Args: {
+          p_squad_id: string;
+        };
+        Returns: SquadMember[];
+      };
+      list_squad_invites: {
+        Args: {
+          p_squad_id: string;
+        };
+        Returns: SquadInviteSummary[];
+      };
+      revoke_invite: {
+        Args: {
+          p_invite_id: string;
+        };
+        Returns: null;
+      };
+      remove_member: {
+        Args: {
+          p_squad_id: string;
+          p_target_user_id: string;
+        };
+        Returns: null;
+      };
+      leave_squad: {
+        Args: {
+          p_squad_id: string;
+        };
+        Returns: null;
+      };
+      transfer_ownership: {
+        Args: {
+          p_squad_id: string;
+          p_new_owner_user_id: string;
+        };
+        Returns: null;
+      };
+      delete_squad: {
+        Args: {
+          p_squad_id: string;
+        };
+        Returns: null;
       };
     };
     Enums: Record<string, never>;

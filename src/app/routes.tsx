@@ -23,12 +23,12 @@ export function AppRoutes() {
       </Route>
       <Route path="/auth/callback" element={<AuthCallbackPage />} />
       <Route path="/status" element={<ServiceStatusPage />} />
+      <Route path="/join" element={<JoinSquadPage />} />
+      <Route path="/join/:token" element={<JoinSquadPage />} />
 
       <Route element={<ProtectedRoute />}>
         <Route path="/onboarding" element={<SquadOnboardingPage />} />
         <Route path="/squads/create" element={<CreateSquadPage />} />
-        <Route path="/join" element={<JoinSquadPage />} />
-        <Route path="/join/:token" element={<JoinSquadPage />} />
 
         <Route element={<AppShell />}>
           <Route path="/squad" element={<SquadFeedPage />} />

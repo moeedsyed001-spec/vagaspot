@@ -1,5 +1,6 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { StatePanel } from '../../components/StatePanel';
+import { readPendingInviteToken } from '../squads/pendingInvite';
 import { useAuth } from './authContextValue';
 import { sanitizeReturnPath } from './authRedirect';
 
@@ -47,6 +48,9 @@ export function PublicOnlyRoute() {
   }
 
   if (user) {
+    if (readPendingInviteToken()) {
+      return <Navigate to="/join" replace />;
+    }
     const state = location.state as LocationStateWithFrom | null;
     const target = sanitizeReturnPath(
       state?.from ? `${state.from.pathname ?? ''}${state.from.search ?? ''}` : undefined,

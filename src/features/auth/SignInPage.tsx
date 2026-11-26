@@ -1,9 +1,10 @@
-import { AlertCircle, ShieldCheck } from 'lucide-react';
+import { AlertCircle, ShieldCheck, Users } from 'lucide-react';
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { BrandMark } from '../../components/BrandMark';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
+import { readPendingInviteToken } from '../squads/pendingInvite';
 import { useAuth } from './authContextValue';
 import { readOAuthErrorFromUrl } from './authRedirect';
 
@@ -14,6 +15,7 @@ export function SignInPage() {
 
   const urlError = readOAuthErrorFromUrl(location.search, location.hash);
   const displayError = authError ?? urlError;
+  const hasPendingInvite = readPendingInviteToken() !== null;
 
   const handleGoogleSignIn = async () => {
     setSubmitting(true);
@@ -47,6 +49,16 @@ export function SignInPage() {
             your presence anytime.
           </span>
         </div>
+
+        {hasPendingInvite ? (
+          <div
+            role="status"
+            className="flex items-start gap-2.5 rounded-[var(--radius-control)] border border-[var(--primary)] bg-[var(--surface-2)] p-3 text-xs text-[var(--text)]"
+          >
+            <Users className="mt-0.5 h-4 w-4 shrink-0 text-[var(--primary)]" aria-hidden="true" />
+            <span>Sign in with Google to accept your squad invitation.</span>
+          </div>
+        ) : null}
 
         {displayError ? (
           <div
